@@ -1,0 +1,325 @@
+package articulo;
+public class Articulo {
+    private String clave;
+    private String descripcion;
+    private double precio;
+    private int existencia;
+    private int disponible;
+
+    public Articulo(String clave, String descripcion, double precio, int existencia, int disponible) {
+        this.clave = clave;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.existencia = existencia;
+        this.disponible = disponible;
+    }
+    
+
+    public String getClave() { return clave; }
+    public void setClave(String clave) { this.clave = clave; }
+
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+    public double getPrecio() { return precio; }
+    public void setPrecio(double precio) { this.precio = precio; }
+
+    public int getExistencia() { return existencia; }
+    public void setExistencia(int existencia) { this.existencia = existencia; }
+    
+    public int getDisponible() { return disponible; }
+    public void setDisponible (int disponible) { this.disponible = disponible; }
+
+
+    @Override
+    public String toString() {
+    return "Articulo{\n" +
+            "  clave='" + clave + "',\n" +
+            "  descripcion='" + descripcion + "',\n" +
+            "  precio=" + precio + ",\n" +
+            "  existencia=" + existencia + "\n" +
+            "  disponible=" + (disponible == 1 ? "Si" : "No") + "\n" +
+            '}';
+}
+}
+
+
+____________________________________________________
+
+
+
+
+
+package articulo;
+
+import java.io.*;
+import java.util.ArrayList;
+
+public class CRUD {
+    private static final String FILE_NAME = "articulo.txt";
+
+    public static void crearArticulo(Articulo articulo) {
+        try (FileWriter fw = new FileWriter(FILE_NAME, true);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw)) {
+            out.println(articulo.getClave());
+            out.println(articulo.getDescripcion());
+            out.println(articulo.getPrecio());
+            out.println(articulo.getExistencia());
+            out.println(articulo.getDisponible());
+        } catch (IOException e) {
+            System.err.println("Error al escribir el archivo: " + e.getMessage());
+        }
+    }
+
+    public static Articulo leerArticulo(String clave) {
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.equals(clave)) {
+                    String descripcion = br.readLine();
+                    double precio = Double.parseDouble(br.readLine());
+                    int existencia = Integer.parseInt(br.readLine());
+                    int disponible = Integer.parseInt(br.readLine());
+                    return new Articulo(clave, descripcion, precio, existencia, disponible);
+                } else {
+                    br.readLine(); 
+                    br.readLine(); 
+                    br.readLine();
+                    br.readLine();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static void actualizarArticulo(Articulo articulo) {
+        ArrayList<Articulo> articulos = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String clave = line;
+                String descripcion = br.readLine();
+                double precio = Double.parseDouble(br.readLine());
+                int existencia = Integer.parseInt(br.readLine());
+                int disponible = Integer.parseInt(br.readLine());
+                if (clave.equals(articulo.getClave())) {
+                    articulos.add(articulo);
+                } else {
+                    articulos.add(new Articulo(clave, descripcion, precio, existencia, disponible));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+        }
+
+        try (FileWriter fw = new FileWriter(FILE_NAME);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw)) {
+            for (Articulo a : articulos) {
+                out.println(a.getClave());
+                out.println(a.getDescripcion());
+                out.println(a.getPrecio());
+                out.println(a.getExistencia());
+                out.println(a.getDisponible());
+            }
+        } catch (IOException e) {
+            System.err.println("Error al escribír el archivo: " + e.getMessage());
+        }
+    }
+
+    public static void borrarArticulo(String clave) {
+        Articulo articulo = leerArticulo (clave);
+        if (articulo !=null){
+            articulo.setDisponible(0);
+            actualizarArticulo(articulo);
+        }
+    }
+
+    public static ArrayList<Articulo> leerTodosLosArticulos() {
+        ArrayList<Articulo> articulos = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String clave = line;
+                String descripcion = br.readLine();
+                double precio = Double.parseDouble(br.readLine());
+                int existencia = Integer.parseInt(br.readLine());
+                int disponible = Integer.parseInt(br.readLine());
+                articulos.add(new Articulo(clave, descripcion, precio, existencia, disponible));
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+        }
+        return articulos;
+    }
+    
+    
+    
+    public static ArrayList<Articulo> leerArticulosDisponibles() {
+        ArrayList<Articulo> articulosDisponibles = new ArrayList<>();
+        for (Articulo articulo : leerTodosLosArticulos()) {
+            if (articulo.getDisponible() == 1) {
+                articulosDisponibles.add(articulo);
+            }
+        }
+        return articulosDisponibles;
+    }
+
+    public static ArrayList<Articulo> leerArticulosNoDisponibles() {
+            ArrayList<Articulo> articulosNoDisponibles = new ArrayList<>();
+            for (Articulo articulo : leerTodosLosArticulos()) {
+                if (articulo.getDisponible() == 0) {
+                    articulosNoDisponibles.add(articulo);
+                }
+            }
+        return articulosNoDisponibles;
+    }
+    }
+
+
+
+___________________________________________________________
+
+
+
+
+
+
+package articulo;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Menu {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int opcion;
+
+        do {
+            System.out.println("Menú:");
+            System.out.println("1. Crear artículo");
+            System.out.println("2. Leer artículo");
+            System.out.println("3. Actualizar artículo");
+            System.out.println("4. Borrar artículo");
+            System.out.println("5. Leer todos los artículos");
+            System.out.println("6. Mostrar artículos disponibles");
+            System.out.println("7. Mostrar artículos NO disponibles");
+            System.out.println("8. Salir");
+            System.out.print("Ingrese la opción deseada: ");
+            opcion = scanner.nextInt();
+            scanner.nextLine();
+
+            
+            switch (opcion) {
+                case 1: {
+                    System.out.print("Ingrese la clave: ");
+                    String clave = scanner.nextLine();
+
+                    if (CRUD.leerArticulo(clave) == null) {
+                        System.out.print("Ingrese la descripción: ");
+                        String descripcion = scanner.nextLine();
+                        System.out.print("Ingrese el precio: ");
+                        double precio = scanner.nextDouble();
+                        System.out.print("Ingrese la existencia: ");
+                        int existencia = scanner.nextInt();
+                        System.out.print("¿El articulo esta disbonible? 1=Disponible, 0=No disponible: ");
+                        int disponible = scanner.nextInt();
+                        scanner.nextLine();
+
+                        Articulo articulo = new Articulo(clave, descripcion, precio, existencia, disponible);
+                        CRUD.crearArticulo(articulo);
+                        System.out.println("Artículo creado con éxito.\n");
+                    } else {
+                        System.out.println("Ya existe un artículo con esa clave. Intente nuevamente.\n");
+                    }
+                    break;
+                }
+                 // Caso para leer un artículo
+                case 2: {
+                    System.out.print("Ingrese la clave del artículo a leer: ");
+                    String clave = scanner.nextLine();
+                    Articulo articulo = CRUD.leerArticulo(clave);
+                    if (articulo != null) {
+                        System.out.println(articulo);
+                    } else {
+                        System.out.println("Artículo no encontrado.\n");
+                    }
+                    break;
+                }
+
+                case 3: {
+                    System.out.print("Ingrese la clave del artículo a actualizar: ");
+                    String clave = scanner.nextLine();
+                    Articulo articulo = CRUD.leerArticulo(clave);
+                    if (articulo != null) {
+                        System.out.print("Ingrese la nueva descripción: ");
+                        String descripcion = scanner.nextLine();
+                        System.out.print("Ingrese el nuevo precio: ");
+                        double precio = scanner.nextDouble();
+                        System.out.print("Ingrese la nueva existencia: ");
+                        int existencia = scanner.nextInt();
+                        System.out.print("¿El articulo esta disbonible? 1=Disponible, 0=No disponible: ");
+                        int disponible = scanner.nextInt();
+                        scanner.nextLine();
+
+                        articulo.setDescripcion(descripcion);
+                        articulo.setPrecio(precio);
+                        articulo.setExistencia(existencia);
+                        articulo.setDisponible(disponible);
+                        CRUD.actualizarArticulo(articulo);
+                        System.out.println("Artículo actualizado con éxito.\n");
+                    } else {
+                        System.out.println("Artículo no encontrado.\n");
+                    }
+                    break;
+                }
+
+                case 4: {
+                    System.out.print("Ingrese la clave del artículo a borrar: ");
+                    String clave = scanner.nextLine();
+                    CRUD.borrarArticulo(clave);
+                    System.out.println("Artículo borrado con éxito.\n");
+                    break;
+                }
+                // Caso para leer todos los artículos
+                case 5: {
+                    ArrayList<Articulo> articulos = CRUD.leerTodosLosArticulos();
+                    for (Articulo articulo : articulos) {
+                        System.out.println(articulo);
+                    }
+                    break;
+                }
+                // caso para salir del programa
+                case 6: {
+                    ArrayList<Articulo> articulosDisponibles = CRUD.leerArticulosDisponibles();
+                    for (Articulo articulo : articulosDisponibles) {
+                        System.out.println(articulo);
+                    }
+                    break;
+                }
+                
+                case 7: {
+                    ArrayList<Articulo> articulosNoDisponibles = CRUD.leerArticulosNoDisponibles();
+                    for (Articulo articulo : articulosNoDisponibles) {
+                        System.out.println(articulo);
+                    }
+                    break;
+                }
+
+                case 8: {
+                    System.out.println("Saliendo del programa...");
+                    break;
+                }
+                default: {
+                    System.out.println("Opción no válida.\n");
+                }
+            }
+        } while (opcion != 8);
+
+        scanner.close();
+    }
+}
+
